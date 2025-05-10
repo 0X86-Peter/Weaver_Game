@@ -2,7 +2,14 @@ import javax.swing.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Represents the core logic and state of the Weaver game.
+ * @invariant startWord.length() == WORD_LENGTH && targetWord.length() == WORD_LENGTH
+ * @invariant dictionary != null && !dictionary.isEmpty()
+ * @invariant currentPath != null && currentPath.get(0).equals(startWord)
+ */
 public class GameModel extends Observable {
+    Set<String> getDictionary() { return this.dictionary; }
     public static final int WORD_LENGTH = 4;
     private final Set<String> dictionary;
     private String startWord;
@@ -13,20 +20,36 @@ public class GameModel extends Observable {
     private boolean showErrors = true;
     private boolean showPath = false;
     private boolean randomWords = false;
+    /**
+     * Sets whether to display error messages.
+     * @requires true (no specific precondition)
+     * @ensures showErrors == newShowErrors
+     */
     public void setShowErrors(boolean showErrors) {
         this.showErrors = showErrors;
         notifyStateChange();
     }
 
+    /**
+     * Sets whether to show the debug path.
+     * @requires true (no specific precondition)
+     * @ensures showPath == newShowPath
+     */
     public void setShowPath(boolean showPath) {
         this.showPath = showPath;
         notifyStateChange();
     }
 
+    /**
+     * Sets whether to use random start/target words.
+     * @requires true (no specific precondition)
+     * @ensures randomWords == newRandomWords &&
+     *          (randomWords changed => words are reinitialized)
+     */
     public void setRandomWords(boolean randomWords) {
         if (this.randomWords != randomWords) {
             this.randomWords = randomWords;
-            initializeWords(); // 重新生成单词
+            initializeWords();
         }
         notifyStateChange();
     }
@@ -77,6 +100,13 @@ public class GameModel extends Observable {
         notifyStateChange();
     }
 
+    /**
+     * Submits a word to progress the game.
+     * @requires word != null && word.length() == WORD_LENGTH
+     * @ensures (\result == true) ==> currentPath.contains(word)
+     * @ensures (\result == false) ==> currentPath remains unchanged
+     * @ensures (\result == true) ==> (word differs by exactly 1 letter from last word)
+     */
     public void submitInputBuffer() {
         String word = inputBuffer.toString().toLowerCase();
         inputBuffer.setLength(0);
@@ -161,6 +191,11 @@ public class GameModel extends Observable {
     public String getCurrentWord() { return currentPath.isEmpty() ? "" : currentPath.get(currentPath.size()-1); }
     public String getInputBuffer() { return inputBuffer.toString().toUpperCase(); }
 
+    /**
+     * Appends a letter to the input buffer.
+     * @requires Character.isLetter(letter) && inputBuffer.length() < WORD_LENGTH
+     * @ensures inputBuffer.length() == \old(inputBuffer.length()) + 1
+     */
     public void appendToInputBuffer(char letter) {
         if (inputBuffer.length() < WORD_LENGTH) {
             inputBuffer.append(Character.toLowerCase(letter));
@@ -170,6 +205,11 @@ public class GameModel extends Observable {
         }
     }
 
+    /**
+     * Deletes the last character from the input buffer.
+     * @requires inputBuffer.length() > 0
+     * @ensures inputBuffer.length() == \old(inputBuffer.length()) - 1
+     */
     public void deleteLastInput() {
         if (inputBuffer.length() > 0) {
             inputBuffer.deleteCharAt(inputBuffer.length()-1);
@@ -177,6 +217,13 @@ public class GameModel extends Observable {
         }
     }
 
+    /**
+     * Sets multiple flags simultaneously.
+     * @requires true (no specific precondition)
+     * @ensures showErrors == newShowErrors && showPath == newShowPath
+     *          && randomWords == newRandomWords
+     * @ensures (randomWords changed => words are reinitialized)
+     */
     public void setFlags(boolean showErrors, boolean showPath, boolean randomWords) {
         boolean wasRandom = this.randomWords;
 

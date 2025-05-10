@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
@@ -7,6 +9,10 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+/**
+ * Represents the graphical user interface for the Weaver game.
+ * @invariant model != null
+ */
 public class GUIView extends JFrame implements Observer {
     private int lastPathSize = 0;
     private final GameModel model;
@@ -26,6 +32,12 @@ public class GUIView extends JFrame implements Observer {
     private SubmitListener submitListener;
     private DeleteListener deleteListener;
 
+    /**
+     * Constructs a GUIView with the specified game model.
+     * @requires model != null
+     * @ensures this.model == model && observers are initialized
+     * @ensures UI components are fully initialized and visible
+     */
     public GUIView(GameModel model) {
         this.model = model;
         this.lastPathSize = model.getCurrentPath().size();
@@ -149,6 +161,11 @@ public class GUIView extends JFrame implements Observer {
         setVisible(true);
     }
 
+    /**
+     * Creates a word row panel with the specified word.
+     * @requires word != null
+     * @ensures \result != null && \result contains 4 letter labels
+     */
     private JPanel createWordRow(String word) {
         JPanel panel = new JPanel(new GridLayout(1, 4, 5, 5));
         panel.setBackground(Color.WHITE);
@@ -169,6 +186,13 @@ public class GUIView extends JFrame implements Observer {
         }
         return panel;
     }
+
+    /**
+     * Creates a keyboard button for the specified character.
+     * @requires Character.isLetter(c)
+     * @ensures \result != null && \result has proper styling
+     * @ensures button triggers keyListener.onKeyPressed(c) when clicked
+     */
 
     private JButton createKeyButton(char c) {
         JButton button = new JButton(String.valueOf(c));
@@ -244,6 +268,12 @@ public class GUIView extends JFrame implements Observer {
         historyPanel.revalidate();
     }
 
+    /**
+     * Updates the UI when the observed model changes.
+     * @requires o instanceof GameModel
+     * @ensures UI components reflect latest model state
+     * @ensures error/win dialogs shown when corresponding events occur
+     */
     @Override
     public void update(Observable o, Object arg) {
         if (arg instanceof GameModel.GameEvent) {
@@ -295,7 +325,22 @@ public class GUIView extends JFrame implements Observer {
             });
         }
     }
+    /**
+     * Sets the listener for keyboard input events.
+     * @requires listener != null
+     * @ensures keyListener == listener
+     */
     public void setKeyListener(KeyListener listener) { keyListener = listener; }
+    /**
+     * Sets the listener for submit button events.
+     * @requires listener != null
+     * @ensures submitListener == listener
+     */
     public void setSubmitListener(SubmitListener listener) { submitListener = listener; }
+    /**
+     * Sets the listener for delete button events.
+     * @requires listener != null
+     * @ensures deleteListener == listener
+     */
     public void setDeleteListener(DeleteListener listener) { deleteListener = listener; }
 }
