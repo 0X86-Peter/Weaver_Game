@@ -1,14 +1,25 @@
 import java.util.Scanner;
 
-// CLI.java
+/**
+ * Command-line interface (CLI) implementation for the Weaver game.
+ * @invariant model != null
+ */
 public class CLI {
     private GameModel model;
-
+    /**
+     * Initializes the CLI with the specified game model and starts the game.
+     * @requires model != null
+     * @ensures this.model == model && game loop is running
+     */
     public CLI(GameModel model) {
         this.model = model;
         startGame();
     }
-
+    /**
+     * Starts the game loop and handles user input.
+     * @requires model.isInitialized()
+     * @ensures Game progresses according to user input until win/exit
+     */
     private void startGame() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Start Word: " + model.getStartWord().toUpperCase());
@@ -31,7 +42,11 @@ public class CLI {
         }
         scanner.close();
     }
-
+    /**
+     * Entry point for CLI version.
+     * @requires args may contain valid flags: "-showErrors", "-showPath", "-randomWords"
+     * @ensures Game starts with specified flags
+     */
     public static void main(String[] args) {
         GameModel model = new GameModel();
         for (String arg : args) {
